@@ -1,0 +1,189 @@
+version: "3.1"
+
+services:
+  # dnsproxy:
+  #   image: defreitas/dns-proxy-server
+  #   hostname: dockerdns
+  #   ports:
+  #     - 5380:5380
+  #     - 53:53/udp
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  # registrator:
+  #   image: gliderlabs/registrator
+  #   command: 'consul://consul:8500'
+  #   links:
+  #     - consul
+  #   depends_on:
+  #     - consul
+  #   volumes:
+  #     - /var/run/docker.sock:/tmp/docker.sock
+  consul:
+    image: consul:1.7.1
+    command: consul agent -dev -log-level=debug -recursor=8.8.8.8 -client=0.0.0.0
+    ports:
+      - "8300:8300"
+      - "8400:8400"
+      - "8500:8500"
+      # - "53:8600/udp"
+    dns: consul
+    dns_search: service.consul
+    labels:
+      - "traefik.enable=false"
+      - SERVICE_IGNORE=true
+  # jaeger:
+  #   image: jaegertracing/all-in-one:latest
+  #   ports:
+  #     - 5775:5775/udp
+  #     - 6831:6831/udp
+  #     - 6832:6832/udp
+  #     - 5778:5778
+  #     - 16686:16686
+  #     - 14268:14268
+  #     - 9411:9411
+  #   environment:
+  #     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+  # traefik:
+  #   image: traefik:latest
+  #   hostname: traefik
+  #   command: --docker --api
+  #   ports:
+  #     - 81:81
+  #     - 8099:8080
+  #   depends_on:
+  #     - consul
+  #   links:
+  #     - consul
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ./traefik/traefik.toml:/etc/traefik/traefik.toml:ro
+  #   restart: always
+  #   labels:
+  #     - SERVICE_IGNORE=true
+  # nats:
+  #   image: "nats:0.8.0"
+  #   entrypoint: "/gnatsd -DV -m=8222 --auth
+  #   ports:
+  #     - "4222:4222"
+  #     - "8222:8222"
+  #   hostname: nats-server
+  # prom:
+  #   image: quay.io/prometheus/prometheus:v2.6.1
+  #   ports:
+  #     - 9090:9090
+  #   volumes:
+  #     - ./prom/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus'
+  #   links:
+  #     - consul
+  #   labels:
+  #     - 'traefik.enable=false'
+  # nats-exporter:
+  #   image: prometheus-nats-exporter
+  #   ports:
+  #     - 7777:7777
+  #   command:
+  #     - -varz
+  #     - -connz
+  #     - -routez
+  #     - -subz
+  #     - http://nats:8222
+  #   links:
+  #     - nats
+  #     - prom
+  #   depends_on:
+  #     - nats
+  # nats-console:
+  #   image: nats-streaming-console
+  #   environment:
+  #     - STAN_URL=nats://nats:4222
+  #     - STAN_MONITOR_URL=http://nats:8222
+  #   links:
+  #     - nats
+  #   ports:
+  #     - 8282:8282
+  # grafana:
+  #   image: grafana/grafana:master
+  #   ports:
+  #     - '30000:3000'
+  #   environment:
+  #     GF_EXPLORE_ENABLED: 'true'
+  #   labels:
+  #     - 'traefik.enable=false'
+  # api:
+  #   image: microhq/micro
+  #   ports:
+  #     - '8080:8080'
+  #   environment:
+  #     MICRO_NAMESPACE: rpx.core
+  #     MICRO_REGISTRY_ADDRESS: consul:8500
+  #   command: --registry_address=consul:8500 --register_interval=5 --register_ttl=10 --api_namespace=rpx.core api
+  #   links:
+  #     - consul
+  #   labels:
+  #     - 'traefik.enable=false'
+  #     - SERVICE_IGNORE=true
+  # proxy:
+  #   image: microhq/micro
+  #   ports:
+  #     - '8081:8081'
+  #   environment:
+  #     MICRO_NAMESPACE: rpx.core
+  #     MICRO_REGISTRY_ADDRESS: consul:8500
+  #   command: --registry_address=consul:8500 --register_interval=5 --register_ttl=10 proxy
+  #   links:
+  #     - consul
+  #   labels:
+  #     - 'traefik.enable=false'
+  #     - SERVICE_IGNORE=true
+#   web:
+#     image: microhq/micro
+#     ports:
+#       - "8082:8082"
+#     environment:
+#       MICRO_NAMESPACE: rpx.core
+#       MICRO_REGISTRY_ADDRESS: consul:8500
+#     command: --registry=consul --registry_address=consul:8500 web
+#     links:
+#       - consul
+#     labels:
+#       - "traefik.enable=false"
+#       - SERVICE_IGNORE=true
+#   recomdapi:
+#     image: gcr.io/dev-rpxapps/recomd-api:latest
+#     ports:
+#       - "9080:9080"
+#     labels:
+#       - "SERVICE_NAME=recomdapi"
+  # fathom:
+  #   image: usefathom/fathom:latest
+  #   ports:
+  #     - '8778:8778'
+  #   environment:
+  #     - 'FATHOM_SERVER_ADDR=:8778'
+  #     - 'FATHOM_GZIP=true'
+  #     - 'FATHOM_DEBUG=false'
+  #     - 'FATHOM_DATABASE_DRIVER=sqlite'
+  #     - 'FATHOM_DATABASE_NAME=./fathom.db'
+  #     - 'FATHOM_DATABASE_USER='
+  #     - 'FATHOM_DATABASE_PASSWORD='
+  #     - 'FATHOM_DATABASE_HOST='
+  #     - 'FATHOM_SECRET=50645367566B59703373367638792F423F4528482B4D6251655468576D5A7134'
+  db:
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: admin
+    ports:
+      - 5432:5432
+  #  volumes:
+  #    - postgres_database:/var/lib/postgresql/data
+  # adminer:
+  #   image: taivokasper/omnidb
+  #   restart: always
+  #   ports:
+  #     - 9502:8080
+  #     - 25482:25482
+volumes:
+  postgres_database: # first create volume by running: docker volume create postgres_database
+    external: true
