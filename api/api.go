@@ -26,7 +26,44 @@ func StartAPI() error {
 		return c.JSONPretty(http.StatusOK, r, "  ")
 	})
 
-	// Route => handler
+	e.GET("/standard_codes", func(c echo.Context) error {
+		ct := c.QueryParam("codetype")
+
+		r, err := postgres.SelectStandardCodes(ct)
+		if err != nil {
+			return err
+		}
+
+		return c.JSONPretty(http.StatusOK, r, "  ")
+	})
+
+	e.POST("/client_code", func(c echo.Context) error {
+		var cc model.ClientCode
+
+		if err := c.Bind(&cc); err != nil {
+			return err
+		}
+
+		_, err := postgres.InsertClientCode(cc)
+		if err != nil {
+			return err
+		}
+		return c.String(http.StatusOK, "client code added")
+	})
+
+	e.POST("/code_type", func(c echo.Context) error {
+		var ct model.CodeType
+
+		if err := c.Bind(&ct); err != nil {
+			return err
+		}
+		_, err := postgres.InsertCodeType(ct)
+		if err != nil {
+			return err
+		}
+		return c.String(http.StatusOK, "code type added")
+	})
+
 	e.POST("/source_system", func(c echo.Context) error {
 		var ss model.SourceSystem
 
@@ -40,7 +77,6 @@ func StartAPI() error {
 		return c.String(http.StatusOK, "source system added")
 	})
 
-	// Route => handler
 	e.POST("/source_system_application", func(c echo.Context) error {
 		var ssa model.SourceSystemApplication
 
@@ -52,6 +88,19 @@ func StartAPI() error {
 			return err
 		}
 		return c.String(http.StatusOK, "source system application added")
+	})
+
+	e.POST("/standard_code", func(c echo.Context) error {
+		var sc model.StandardCode
+
+		if err := c.Bind(&sc); err != nil {
+			return err
+		}
+		_, err := postgres.InsertStandardCode(sc)
+		if err != nil {
+			return err
+		}
+		return c.String(http.StatusOK, "standard code added")
 	})
 
 	// Start server

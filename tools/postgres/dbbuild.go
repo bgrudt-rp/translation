@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS source_system_application (
 	vendor_name varchar(50),
 	created_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
 	created_user varchar(50) NOT NULL,
-	updated_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
-	updated_user varchar(50) NOT NULL
+	modified_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
+	modified_user varchar(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS source_system ( 
@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS source_system (
 	description varchar(50) NOT NULL,
 	created_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
 	created_user varchar(50) NOT NULL,
-	updated_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
-	updated_user varchar(50) NOT NULL
+	modified_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
+	modified_user varchar(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS code_type (
@@ -37,34 +37,37 @@ CREATE TABLE IF NOT EXISTS code_type (
 	description varchar(50) NOT NULL,
 	created_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
 	created_user varchar(50) NOT NULL,
-	updated_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
-	updated_user varchar(50) NOT NULL
+	modified_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
+	modified_user varchar(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS standard_code (
 	standard_code_id serial PRIMARY KEY,
 	standard_code_uuid uuid DEFAULT uuid_generate_v4 (),
+	type_id integer REFERENCES code_type(code_type_id),
 	code varchar(50) NOT NULL,
 	description varchar(50) NOT NULL,
 	created_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
 	created_user varchar(50) NOT NULL,
-	updated_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
-	updated_user varchar(50) NOT NULL
+	modified_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
+	modified_user varchar(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS client_code (
 	client_code_id serial PRIMARY KEY,
 	client_code_uuid uuid DEFAULT uuid_generate_v4 (),
-	type_id integer REFERENCES code_type(code_type_id),
+	type_id integer REFERENCES code_type(code_type_id) NOT NULL,
 	source_system_id integer REFERENCES source_system(source_system_id) NOT NULL,
 	standard_code_id integer REFERENCES standard_code(standard_code_id),
 	code varchar(255) NOT NULL,
 	description varchar(255),
-	validation_flag boolean DEFAULT FALSE, 
+	automap_int int DEFAULT 0,
+	validated_flag boolean DEFAULT FALSE, 
+	primary_mapping_flag boolean DEFAULT FALSE,
 	created_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
 	created_user varchar(50) NOT NULL,
-	updated_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
-	updated_user varchar(50) NOT NULL
+	modified_datetime timestamp with time zone DEFAULT current_timestamp NOT NULL,
+	modified_user varchar(50) NOT NULL
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS ind_uq_appname ON source_system_application (
@@ -81,17 +84,14 @@ CREATE UNIQUE INDEX IF NOT EXISTS ind_uq_client_code ON client_code (
  	code
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS ind_uq_std ON client_code (
+CREATE UNIQUE INDEX IF NOT EXISTS ind_uq_standard_code ON standard_code (
 	type_id,
-	source_system_id,
-	code
-);
-
-CREATE INDEX IF NOT EXISTS ind_std_code ON standard_code (
 	code
 );
 `
 
+//BuildDB will call a long string of SQL statements to
+//populate a blank PG database.
 func BuildDB() error {
 	db, err := sql.Open("postgres", Dbconn)
 	if err != nil {

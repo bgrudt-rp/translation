@@ -1,0 +1,14 @@
+{
+    "mappings" : [
+        {
+            "code_type" : "Patient Class",
+            "client_code" : "E",
+            "standard_code" : "Emergency"
+        },
+        {
+            "code_type" : "Patient Class",
+            "client_code" : "I",
+            "standard_code" : "Inpatient"
+        }
+    ]
+}
