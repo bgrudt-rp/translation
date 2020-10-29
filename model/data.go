@@ -15,11 +15,22 @@ type ClientCode struct {
 	StandardCode       StandardCode `json:"standard_code,omitempty"`
 	Metadata           Metadata     `json:"metadata,omitempty"`
 }
+
+type CodeMapping struct {
+	CodeType     string `json:"code_type"`
+	ClientCode   string `json:"client_code"`
+	StandardCode string `json:"standard_code"`
+}
+
 type CodeType struct {
 	ID          string   `json:"id,omitempty"`
 	UuID        string   `json:"uuid"`
 	Description string   `json:"description"`
 	Metadata    Metadata `json:"metadata,omitempty"`
+}
+
+type Mappings struct {
+	Mapping []CodeMapping `json:"mappings"`
 }
 
 type Metadata struct {
@@ -52,6 +63,13 @@ type StandardCode struct {
 	Description string   `json:"description"`
 	CodeType    CodeType `json:"code_type"`
 	Metadata    Metadata `json:"metadata,omitempty"`
+}
+
+type StandardCodeByEMR struct {
+	ID          string `json:"id"`
+	Code        string `json:"code"`
+	Description string `json:"description"`
+	Number      int    `json:"number"`
 }
 
 type StandardCodeList struct {

@@ -2,13 +2,13 @@
     "mappings" : [
         {
             "code_type" : "Patient Class",
-            "client_code" : "E",
-            "standard_code" : "Emergency"
+            "client_code" : "I",
+            "standard_code" : "I"
         },
         {
             "code_type" : "Patient Class",
-            "client_code" : "I",
-            "standard_code" : "Inpatient"
+            "client_code" : "O",
+            "standard_code" : "O"
         }
     ]
 }
