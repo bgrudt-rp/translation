@@ -16,20 +16,20 @@ func InsertSourceSystem(ss model.SourceSystem) (sql.Result, error) {
 
 	qry := `SELECT source_system_application_id FROM source_system_application WHERE application_name = $1;`
 
-	row := db.QueryRow(qry, ss.Application.Name)
+	row := model.Db.QueryRow(qry, ss.Application.Name)
 
 	var id int
 	var qry2 string
 	switch err := row.Scan(&id); err {
 	case sql.ErrNoRows:
-		qry2 = "INSERT INTO source_system (description, created_user, modified_user) VALUES ('" + ss.Description + "', '" + appUser + "', '" + appUser + "');"
+		qry2 = "INSERT INTO source_system (description, created_user, modified_user) VALUES ('" + ss.Description + "', '" + model.AppUser + "', '" + model.AppUser + "');"
 	case nil:
-		qry2 = "INSERT INTO source_system (application_id, description, created_user, modified_user) VALUES ('" + strconv.Itoa(id) + "', '" + ss.Description + "', '" + appUser + "', '" + appUser + "');"
+		qry2 = "INSERT INTO source_system (application_id, description, created_user, modified_user) VALUES ('" + strconv.Itoa(id) + "', '" + ss.Description + "', '" + model.AppUser + "', '" + model.AppUser + "');"
 	default:
 		return nil, err
 	}
 
-	r, err := db.Exec(qry2)
+	r, err := model.Db.Exec(qry2)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func SelectSourceSystems() ([]model.SourceSystem, error) {
 
 	qry := "SELECT * FROM source_system;"
 	fmt.Println(qry)
-	r, err := db.Query(qry)
+	r, err := model.Db.Query(qry)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func SelectSourceSystems() ([]model.SourceSystem, error) {
 
 		qry := `SELECT * FROM source_system_application WHERE source_system_application_id = $1;`
 
-		row := db.QueryRow(qry, ssr.Application.ID)
+		row := model.Db.QueryRow(qry, ssr.Application.ID)
 
 		switch err := row.Scan(&sar.ID, &sar.UuID, &sar.Name, &sar.Vendor, &sar.Metadata.CreatedDT, &sar.Metadata.CreatedBy, &sar.Metadata.ModifiedDT, &sar.Metadata.ModifiedBy); err {
 		case nil:

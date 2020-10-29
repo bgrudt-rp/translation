@@ -18,7 +18,7 @@ func InsertStandardCode(sc model.StandardCode) (sql.Result, error) {
 
 	qry := `SELECT code_type_id FROM code_type WHERE description = $1;`
 
-	row := db.QueryRow(qry, sc.CodeType.Description)
+	row := model.Db.QueryRow(qry, sc.CodeType.Description)
 
 	var id int
 	var qry2 string
@@ -26,12 +26,12 @@ func InsertStandardCode(sc model.StandardCode) (sql.Result, error) {
 	case sql.ErrNoRows:
 		return nil, fmt.Errorf("code type not found.  please verify")
 	case nil:
-		qry2 = "INSERT INTO standard_code (code, description, type_id, created_user, modified_user) VALUES ('" + sc.Code + "', '" + sc.Description + "', '" + strconv.Itoa(id) + "', '" + appUser + "', '" + appUser + "');"
+		qry2 = "INSERT INTO standard_code (code, description, type_id, created_user, modified_user) VALUES ('" + sc.Code + "', '" + sc.Description + "', '" + strconv.Itoa(id) + "', '" + model.AppUser + "', '" + model.AppUser + "');"
 	default:
 		return nil, fmt.Errorf("error finding code type  please verify")
 	}
 
-	r, err := db.Exec(qry2)
+	r, err := model.Db.Exec(qry2)
 	if err != nil {
 		return nil, err
 	}
@@ -44,20 +44,16 @@ func InsertStandardCode(sc model.StandardCode) (sql.Result, error) {
 //values for the associated code type.
 func SelectStandardCodes(t string) ([]model.StandardCodeList, error) {
 	var scList []model.StandardCodeList
-	var scl model.StandardCodeList
-	var sclr model.StandardCodeList
-	var sc model.StandardCodes
-	var scr model.StandardCodes
 
 	var qry string
 	if t != "" {
-		qry = "SELECT * FROM code_type WHERE description = $1;"
+		qry = "SELECT code_type_id, code_type_uuid, description FROM code_type WHERE description = $1;"
 
 	} else {
 		t = "1"
-		qry = "SELECT * FROM code_type WHERE 1 = $1;"
+		qry = "SELECT code_type_id, code_type_uuid, description FROM code_type WHERE 1 = $1;"
 	}
-	r, err := db.Query(qry, t)
+	r, err := model.Db.Query(qry, t)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +61,10 @@ func SelectStandardCodes(t string) ([]model.StandardCodeList, error) {
 	defer r.Close()
 
 	for r.Next() {
-		err := r.Scan(&sclr.ID, &sclr.UuID, &sclr.Description, &sclr.Metadata.CreatedDT, &sclr.Metadata.CreatedBy, &sclr.Metadata.ModifiedDT, &sclr.Metadata.ModifiedBy)
+		var scl model.StandardCodeList
+		var sclr model.StandardCodeList
+
+		err := r.Scan(&sclr.ID, &sclr.UuID, &sclr.Description)
 		if err != nil {
 			return nil, err
 		}
@@ -74,13 +73,16 @@ func SelectStandardCodes(t string) ([]model.StandardCodeList, error) {
 
 		qry2 := `SELECT * FROM standard_code WHERE type_id = $1;`
 
-		r2, err := db.Query(qry2, sclr.ID)
+		r2, err := model.Db.Query(qry2, sclr.ID)
 		if err != nil {
 			return nil, err
 		}
 		defer r2.Close()
 
 		for r2.Next() {
+			var sc model.StandardCodes
+			var scr model.StandardCodes
+
 			err := r2.Scan(&scr.ID, &scr.UuID, &scr.TypeID, &scr.Code, &scr.Description, &scr.Metadata.CreatedDT, &scr.Metadata.CreatedBy, &scr.Metadata.ModifiedDT, &scr.Metadata.ModifiedBy)
 			if err != nil {
 				return nil, err

@@ -1,6 +1,6 @@
 package postgres
 
-import "database/sql"
+import "translation/model"
 
 //Dbbuild will be refined at some point
 //We are just trying to form the DB structure for a translation service
@@ -93,12 +93,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS ind_uq_standard_code ON standard_code (
 //BuildDB will call a long string of SQL statements to
 //populate a blank PG database.
 func BuildDB() error {
-	db, err := sql.Open("postgres", Dbconn)
-	if err != nil {
-		return err
-	}
-
-	_, err = db.Exec(Dbbuild)
+	_, err := model.Db.Exec(Dbbuild)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package postgres
+package model
 
 import (
 	"database/sql"
@@ -21,13 +21,13 @@ const (
 //Dbconn - postgres connection string
 var Dbconn = fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable", User, Password, Database, Host, Port)
 
-const appUser string = "bgrudt"
+const AppUser string = "bgrudt"
 
-var db *sql.DB
+var Db *sql.DB
 
 func init() {
 	var err error
-	db, err = sql.Open("postgres", Dbconn)
+	Db, err = sql.Open("postgres", Dbconn)
 	if err != nil {
 		log.Fatal(err)
 	}

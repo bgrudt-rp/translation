@@ -20,7 +20,7 @@ func StartAPI() error {
 	e.GET("/source_systems", func(c echo.Context) error {
 		r, err := postgres.SelectSourceSystems()
 		if err != nil {
-			return err
+			return echo.ErrInternalServerError
 		}
 
 		return c.JSONPretty(http.StatusOK, r, "  ")
@@ -31,7 +31,7 @@ func StartAPI() error {
 
 		r, err := postgres.SelectStandardCodes(ct)
 		if err != nil {
-			return err
+			return echo.ErrInternalServerError
 		}
 
 		return c.JSONPretty(http.StatusOK, r, "  ")
@@ -41,12 +41,13 @@ func StartAPI() error {
 		var cc model.ClientCode
 
 		if err := c.Bind(&cc); err != nil {
-			return err
+			c.Logger().Error(err)
+			return echo.ErrBadRequest
 		}
 
 		_, err := postgres.InsertClientCode(cc)
 		if err != nil {
-			return err
+			return echo.ErrInternalServerError
 		}
 		return c.String(http.StatusOK, "client code added")
 	})
@@ -55,7 +56,7 @@ func StartAPI() error {
 		var ct model.CodeType
 
 		if err := c.Bind(&ct); err != nil {
-			return err
+			return echo.ErrBadRequest
 		}
 		_, err := postgres.InsertCodeType(ct)
 		if err != nil {

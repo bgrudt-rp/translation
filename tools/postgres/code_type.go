@@ -13,8 +13,8 @@ func InsertCodeType(c model.CodeType) (sql.Result, error) {
 		return nil, fmt.Errorf("code description too long.  do not exceed 50 characters")
 	}
 
-	qry := "INSERT INTO code_type (description, created_user, modified_user) VALUES ('" + c.Description + "', '" + appUser + "', '" + appUser + "');"
-	r, err := db.Exec(qry)
+	qry := "INSERT INTO code_type (description, created_user, modified_user) VALUES ('" + c.Description + "', '" + model.AppUser + "', '" + model.AppUser + "');"
+	r, err := model.Db.Exec(qry)
 	if err != nil {
 		return nil, err
 	}

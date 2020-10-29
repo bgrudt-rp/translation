@@ -16,9 +16,9 @@ func InsertSourceSystemApplication(ssa model.SourceSystemApplication) (sql.Resul
 		return nil, fmt.Errorf("vendor name too long.  do not exceed 50 characters")
 	}
 
-	qry := "INSERT INTO source_system_application (application_name, vendor_name, created_user, modified_user) VALUES ('" + ssa.Name + "', '" + ssa.Vendor + "', '" + appUser + "', '" + appUser + "');"
+	qry := "INSERT INTO source_system_application (application_name, vendor_name, created_user, modified_user) VALUES ('" + ssa.Name + "', '" + ssa.Vendor + "', '" + model.AppUser + "', '" + model.AppUser + "');"
 	fmt.Println(qry)
-	r, err := db.Exec(qry)
+	r, err := model.Db.Exec(qry)
 	if err != nil {
 		return nil, err
 	}
